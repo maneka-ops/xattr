@@ -9,6 +9,12 @@ macro_rules! platforms {
             pub use self::$module::*;
 
             #[cfg(any($(target_os = $platform),*))]
+            // glibc's libc bindings dropped ENOATTR (it is the BSD name
+            // of ENODATA), so Linux/Android use ENODATA; the other
+            // platforms in each group keep libc's native ENOATTR.
+            #[cfg(any(target_os = "linux", target_os = "android"))]
+            pub const ENOATTR: ::libc::c_int = ::libc::ENODATA;
+            #[cfg(not(any(target_os = "linux", target_os = "android")))]
             pub const ENOATTR: ::libc::c_int = ::libc::ENOATTR;
         )*
 
